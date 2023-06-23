@@ -170,6 +170,28 @@ def find_move(index, move_name):
     return found
 
 
+def get_defense_for_frontier_pokemon(level, set_number, pokemon):
+    pokemon_index = pokemon_name_to_index[pokemon['name']]
+    base_defense = pokemon_index_to_pokemon[pokemon_index].all_stats.base_stats.stats.defense
+    iv = get_iv_for_frontier_pokemon(set_number)
+    ev = pokemon["defense_ev"]
+    return floor(
+        get_stat_for_frontier_pokemon(base_defense, iv, ev, level) *
+        get_defense_multiplier(pokemon['nature'])
+    )
+
+
+def get_special_defense_for_frontier_pokemon(level, set_number, pokemon):
+    pokemon_index = pokemon_name_to_index[pokemon['name']]
+    base_special_defense = pokemon_index_to_pokemon[pokemon_index].all_stats.base_stats.stats.special_defense
+    iv = get_iv_for_frontier_pokemon(set_number)
+    ev = pokemon["special_defense_ev"]
+    return floor(
+        get_stat_for_frontier_pokemon(base_special_defense, iv, ev, level) *
+        get_special_defense_multiplier(pokemon['nature'])
+    )
+
+
 def get_set_to_damage_tables(level):
     set_number_to_damage_table = defaultdict(lambda: [])
     for set_number, pokemon_list in set_number_to_pokemon[0].items():
@@ -180,8 +202,11 @@ def get_set_to_damage_tables(level):
             speed = get_speed_for_frontier_trainer(level, int(set_number), pokemon)
             attack = get_attack_for_frontier_pokemon(level, int(set_number), pokemon)
             special_attack = get_special_attack_for_frontier_pokemon(level, int(set_number), pokemon)
-            min_defense = 5
-            max_defense = 230
+            defense = get_defense_for_frontier_pokemon(level, int(set_number), pokemon)
+            special_defense = get_special_defense_for_frontier_pokemon(level, int(set_number), pokemon)
+
+            min_defense = 9
+            max_defense = 614
             for move in pokemon['move_names']:
                 if move != "-":
                     move = find_move(pokemon["index"], move)
@@ -200,15 +225,19 @@ def get_set_to_damage_tables(level):
                         damage_table = AttackDamageTable(
                             move_type=move_type.value,
                             category=move.category.value,
-                            defense_to_damage=defense_to_health
+                            defense_to_damage=defense_to_health,
+                            move_name=move.name
                         )
                         damage_tables.append(damage_table)
             set_number_to_damage_table[set_number].append(
                 AttackDamageTables(
                     pokemon=pokemon['name'],
                     hp=hp,
+                    defense=defense,
+                    special_defense=special_defense,
                     speed=speed,
-                    attack_damage_tables=damage_tables
+                    attack_damage_tables=damage_tables,
+                    pokemon_types=pokemon_index_to_pokemon[str(pokemon['index'])].pokemon_information.pokemon_types
                 )
             )
     return set_number_to_damage_table
@@ -222,7 +251,7 @@ def load_frontier_set_to_damage_tables(level) -> Dict[int, AttackDamageTables]:
             fo.write(json.dumps(cattr.unstructure(set_to_damage_tables)))
     else:
         with open(file_name, "r") as fo:
-            set_to_damage_tables = cattr.structure(json.loads(fo.read()),  Dict[int, AttackDamageTables])
+            set_to_damage_tables = cattr.structure(json.loads(fo.read()),  Dict[int, list[AttackDamageTables]])
     return set_to_damage_tables
 
 

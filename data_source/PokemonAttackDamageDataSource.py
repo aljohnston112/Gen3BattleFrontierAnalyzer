@@ -22,8 +22,11 @@ def get_pokemon_to_damage_tables(level):
         speed = pokemon.all_stats.level_50_min_stats.speed
         attack = pokemon.all_stats.level_50_min_stats.attack
         special_attack = pokemon.all_stats.level_50_min_stats.special_attack
-        min_defense = 5
-        max_defense = 230
+        defense = pokemon.all_stats.level_50_min_stats.defense
+        special_defense = pokemon.all_stats.level_50_min_stats.special_defense
+
+        min_defense = 9
+        max_defense = 614
         attacks: list[Attack] = []
 
         for attack_level, attack_list in pokemon.emerald_level_up_attacks.items():
@@ -47,7 +50,59 @@ def get_pokemon_to_damage_tables(level):
             move_type = move.pokemon_type
             power = move.power
             category = move.category
-            if category != Category.STATUS:
+            if category != "status" and category != Category.STATUS and move.accuracy == 100 and \
+                    move.name != "Razor Wind" and \
+                    move.name != "Skull Bash" and \
+                    move.name != "Sky Attack" and \
+                    move.name != "Solarbeam" and \
+                    move.name != "Rock Wrecker" and \
+                    move.name != "Roar Of Time" and \
+                    move.name != "Hyper Beam" and \
+                    move.name != "Hydro Cannon" and \
+                    move.name != "Giga Impact" and \
+                    move.name != "Wood Hammer" and \
+                    move.name != "Volt Tackle" and \
+                    move.name != "Take Down" and \
+                    move.name != "Submission" and \
+                    move.name != "Selfdestruct" and \
+                    move.name != "Head Smash" and \
+                    move.name != "Flare Blitz" and \
+                    move.name != "Double-edge" and \
+                    move.name != "Brave Bird" and \
+                    move.name != "Blast Burn" and \
+                    move.name != "Endeavor" and \
+                    move.name != "Dragon Rage" and \
+                    move.name != "Super Fang" and \
+                    move.name != "Sonicboom" and \
+                    move.name != "Mirror Coat" and \
+                    move.name != "Counter" and \
+                    move.name != "Bide" and \
+                    move.name != "Metal Burst" and \
+                    move.name != "Gyro Ball" and \
+                    move.name != "Magnitude" and \
+                    move.name != "Horn Drill" and \
+                    move.name != "Fissure" and \
+                    move.name != "Sheer Cold" and \
+                    move.name != "Guillotine" and \
+                    move.name != "Natural Gift" and \
+                    move.name != "Low Kick" and \
+                    move.name != "Present" and \
+                    move.name != "Seismic Toss" and \
+                    move.name != "Night Shade" and \
+                    move.name != "Punishment" and \
+                    move.name != "Reversal" and \
+                    move.name != "Flail" and \
+                    move.name != "Trump Card" and \
+                    move.name != "Fling" and \
+                    move.name != "Wring Out" and \
+                    move.name != "Frustration" and \
+                    move.name != "Return" and \
+                    move.name != "Spit Up" and \
+                    move.name != "Hidden Power" and \
+                    move.name != "Psywave" and \
+                    move.name != "Crush Grip" and \
+                    move.name != "Grass Knot" and \
+                    move.name != "Belly Drum":
                 a = attack if category == Category.PHYSICAL else special_attack
                 defense_to_health = dict()
                 x = (((2.0 * level) / 5.0) + 2) * power * a
@@ -57,6 +112,7 @@ def get_pokemon_to_damage_tables(level):
                         damage *= 1.5
                     defense_to_health[d] = damage
                 damage_table = AttackDamageTable(
+                    move_name=move.name,
                     move_type=move.pokemon_type.name,
                     category=move.category.name,
                     defense_to_damage=defense_to_health
@@ -65,7 +121,10 @@ def get_pokemon_to_damage_tables(level):
         pokemon_to_damage_tables[pokemon.pokemon_information.name].append(
             AttackDamageTables(
                 pokemon=pokemon.pokemon_information.name,
+                pokemon_types=pokemon.pokemon_information.pokemon_types,
                 hp=hp,
+                defense=defense,
+                special_defense=special_defense,
                 speed=speed,
                 attack_damage_tables=damage_tables
             )
@@ -73,7 +132,7 @@ def get_pokemon_to_damage_tables(level):
     return pokemon_to_damage_tables
 
 
-def load_all_pokemon_set_to_damage_tables(level):
+def load_all_pokemon_to_damage_tables(level):
     file_name = POKEMON_TO_DAMAGE_TABLES + str(level)
     if not exists(file_name):
         set_to_damage_tables = get_pokemon_to_damage_tables(level)
@@ -81,11 +140,11 @@ def load_all_pokemon_set_to_damage_tables(level):
             fo.write(json.dumps(cattr.unstructure(set_to_damage_tables)))
     else:
         with open(file_name, "r") as fo:
-            set_to_damage_tables = cattr.structure(json.loads(fo.read()),  Dict[str, AttackDamageTables])
+            set_to_damage_tables = cattr.structure(json.loads(fo.read()),  Dict[str, list[AttackDamageTables]])
     return set_to_damage_tables
 
 
 if __name__ == "__main__":
     level = 50
-    set_to_damage_tables = load_all_pokemon_set_to_damage_tables(level)
+    pokemon_to_damage_tables = load_all_pokemon_to_damage_tables(level)
     pass
