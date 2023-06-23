@@ -1,9 +1,9 @@
+import copy
 import json
 from collections import defaultdict
 from os.path import exists
 
 from Config import SET_TO_POKEMON_TO_MOVE_TO_RANK_FILE, SET_TO_POKEMON_TO_MOVES_AND_RANKS
-from data_class.PokemonType import convert_to_pokemon_type
 from TypeChartDataSource import get_defender_type_dict
 from data_source.frontier_defense_table_data_source import load_frontier_set_to_damage_tables
 from data_source.PokemonAttackDamageDataSource import get_pokemon_to_damage_tables
@@ -31,6 +31,7 @@ def get_defense_multipliers_for_type(
             cached = True
 
     if not cached:
+        current_defense_multipliers = copy.deepcopy(current_defense_multipliers)
         # [no_eff, not_eff, normal_eff, super_eff]
         no_effect_types = defender_type_chart[0].get(pokemon_type, [])
         not_effective_types = defender_type_chart[1].get(pokemon_type, [])

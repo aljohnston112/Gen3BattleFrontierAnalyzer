@@ -19,7 +19,7 @@ def print_ranks():
         for set_number, pokemon_to_rank_to_moves_and_ranks in set_to_pokemon_to_rank_and_moves.items():
             print("Set: " + set_number)
 
-            for poke, rank_to_moves_and_ranks in sorted(pokemon_to_rank_to_moves_and_ranks.items(), key=lambda x: x[1][0], reverse=True):
+            for poke, rank_to_moves_and_ranks in sorted(pokemon_to_rank_to_moves_and_ranks.items(), key=lambda x: x[1][0], reverse=True)[:3]:
                 moves_and_ranks = rank_to_moves_and_ranks
                 print(poke + ": ")
                 pp(moves_and_ranks)
@@ -29,7 +29,7 @@ def print_ranks():
 
 def print_move_sets():
     pokemon = ["Infernape"]
-    with open(SET_TO_POKEMON_TO_MOVES_AND_RANKS + "0.json", "r") as fo:
+    with open(SET_TO_POKEMON_TO_MOVES_AND_RANKS + ".json", "r") as fo:
         set_to_pokemon_to_move_to_rank = json.loads(fo.read())
         pokemon_to_rank = defaultdict(lambda: 0.0)
         for set_number, pokemon_to_moves_and_ranks in sorted(set_to_pokemon_to_move_to_rank.items(), key=lambda x: x[0]):
